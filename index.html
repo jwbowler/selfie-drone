@@ -1,6 +1,7 @@
 <script src="hls.min.js"></script>
 <script src="canvas-to-blob.min.js"></script>
-<script src="FileSaver.min.js"></script>
+<!-- <script src="FileSaver.min.js"></script> -->
+<script src="download.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 
 <video id="video">
@@ -47,7 +48,7 @@
         $output.prepend(img);
 
         canvas.toBlob(function(blob) {
-            saveAs(blob, "screenshot.png");
+            download(blob, "screenshot.png");
             console.log("Boom");
         });
     };
