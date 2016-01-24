@@ -1,0 +1,137 @@
+<script src="hls.min.js"></script>
+<script src="canvas-to-blob.min.js"></script>
+<!-- <script src="FileSaver.min.js"></script> -->
+<script src="download.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+
+<video id="video"></video>
+
+<!-- <form id="select-video-url" action="/" method="get"> -->
+    <!-- <div> -->
+        <!-- <input type="text" name="video_url"> -->
+        <!-- <input type="submit"> -->
+    <!-- </div> -->
+<!-- </form> -->
+
+<div id="controls">
+    <button id="capture">Capture</button>
+
+    <form id="post-tweet-form" action="/foo" method="get">
+        <div>
+            <input type="text" name="tweet_text">
+            <input type="submit">
+        </div>
+    </form>
+</div>
+
+<div id="output"></div>
+
+<script>
+(function() {
+    "use strict";
+
+    var video, $output;
+    var scale = 1;
+
+    var initialize = function() {
+        $output = $("#output");
+        video = $("#video").get(0);
+        $("#capture").click(captureImage);
+
+        setVideo("http://www.streambox.fr/playlists/test_001/stream.m3u8");
+        // setVideo("http://periscope-prod-us-west-1.global.ssl.fastly.net/i127ac5a0/liveorigin/C3_UUW3ukSu_D25I77894ZdGKff2zWwbG-iXjCxT_3biyhoIDjP3Pd4VcUGh1wp6znkB9N6UoE2QlWwS26jn9Q==/playlist.m3u8?t=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsInZlcnNpb24iOiIyIn0.eyJBbGxvd2VkUHJvdG9jb2xzIjpbImhscyJdLCJCcm9hZGNhc3RJZCI6IjFNWXhOYUREb3B3SnciLCJHcmFudFR5cGUiOiJyZWFkIiwiR3JhbnRlZEF0IjowLCJHcmFudGVkVG8iOiJQVUJMSUMifQ.C2cDlCTnAQRmnhzgJ_d_rHE0nXC0jB7jNIjRL4DmiwM");
+
+        /*
+        $("#select-video-url").submit(function(event) {
+            var url = $("input:first").val();
+            console.log(url);
+            setVideo(url);
+            event.preventDefault();
+        });
+        */
+    };
+
+    var setVideo = function(url) {
+        if(Hls.isSupported()) {
+            var video = document.getElementById('video');
+            var hls = new Hls();
+            hls.loadSource(url);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED,function() {
+                video.play();
+            });
+        }
+    };
+
+    var captureImage = function() {
+        var canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth * scale;
+        canvas.height = video.videoHeight * scale;
+        canvas.getContext('2d')
+            .drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        var img = document.createElement("img");
+        img.src = canvas.toDataURL();
+        console.log(img.src)
+        $output.prepend(img);
+
+        canvas.toBlob(function(blob) {
+            download(blob, "screenshot.png");
+            console.log("Boom");
+
+            /*
+            $.ajax({
+                type: "POST",
+                url: "/bar",
+                data: {
+                    query_text: "blah",
+                    image: blob
+                },
+                success: function() {
+                    //
+                },
+                error: function() {
+                    //
+                }
+            });
+            */
+
+            /*
+            var formData = new FormData();
+            formData.append("tweet_text", "blah");
+            formData.append("image", blob);
+
+            $.ajax({
+                type: "POST",
+                url: "/bar",
+                data: formData,
+                success: function() {
+                    console.log("Yay!")
+                },
+                error: function() {
+                    console.log("Boo")
+                }
+            });
+            */
+        });
+    };
+
+    /*
+    var postImage = function() {
+        $.ajax({
+            type: "GET",
+            url: "/foo",
+            success: function() {
+                //
+            },
+            error: function() {
+                //
+            }
+        });
+    }
+    */
+
+    $(initialize);
+
+}());
+</script>
